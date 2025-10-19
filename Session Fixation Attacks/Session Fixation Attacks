@@ -1,0 +1,60 @@
+Session Fixation Attacks — an overview
+What is session fixation?
+
+Session fixation is a web attack in which an attacker forces or tricks a user into using a session identifier (session ID) that the attacker already knows. If the application fails to replace that session ID after the user authenticates, the attacker can reuse the same ID to impersonate the authenticated user and gain full access to their account.
+
+How the attack works
+
+Attacker obtains a valid session ID. The attacker visits the target site or otherwise generates a session identifier that the application accepts.
+
+Attacker fixes the session for the victim. The attacker causes the victim’s browser to use that session ID — for example by sending a URL with the session ID, by injecting a cookie, or via XSS or phishing techniques.
+
+Victim authenticates using the fixed session ID. The application associates the authentication state with the existing session ID.
+
+Attacker reuses the same session ID. Because the session ID did not change after login, the attacker can use it to access the victim’s authenticated session.
+
+Common vectors and examples
+
+Session ID in URL parameters. A link such as https://example.com/login?sid=ABC123 can be shared with the victim.
+
+Cookie injection. If an attacker can set or influence cookies in the victim’s browser, they can fix a session.
+
+Cross-site scripting (XSS). XSS can be used to overwrite session identifiers or force the victim into a chosen session.
+
+Phishing or social engineering. Convincing a user to follow a specially crafted link or to execute actions that use the attacker’s session.
+
+A simple real-world scenario: an attacker generates session ID S1, sends the victim a login link that sets S1. The victim logs in; the server uses S1 as the authenticated session. The attacker then uses S1 to access the victim’s account.
+
+Why applications are vulnerable
+
+The server does not regenerate session IDs after authentication.
+
+Session IDs are allowed in URLs or other easily manipulated locations.
+
+Cookies lack secure attributes (HttpOnly, Secure, SameSite).
+
+Poor use of authentication frameworks or custom session management code.
+
+Long session lifetimes and missing inactivity timeouts.
+
+Effective mitigations
+
+Regenerate session ID on privilege change (especially after login). This is the single most important defense. Regenerate the session identifier and discard the old one immediately when the user authenticates or when privilege levels change.
+
+Avoid exposing session IDs in URLs. Use cookies for session tracking instead of URL parameters.
+
+Set strong cookie attributes. Use HttpOnly, Secure, and SameSite attributes to reduce theft and fixation risk.
+
+Invalidate old sessions. When regenerating, make sure the old session cannot be reused.
+
+Limit session lifetime and enforce inactivity timeouts. Shorter lifetimes reduce the window for exploitation.
+
+Use established frameworks and libraries. Well-maintained authentication libraries often handle session regeneration and cookie management correctly.
+
+Defend against XSS. Preventing XSS reduces the risk of session manipulation on the client side.
+
+Monitor and log suspicious session activity. Detect concurrent use of the same session from different IPs or unusual user-agents.
+
+Summary
+
+Session fixation remains a practical threat when session management is handled incorrectly. The mitigation is straightforward: never let a pre-authentication session ID survive into an authenticated session. Regenerate session IDs at login, secure cookies, avoid URL-based session IDs, and use well-tested authentication frameworks. These measures combined will eliminate the classic session fixation attack vector and significantly harden session security.
